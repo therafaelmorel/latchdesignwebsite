@@ -27,14 +27,14 @@
     a{color:inherit}
     .shell{width:min(1420px,calc(100% - 40px));margin:0 auto;padding:20px 0 28px}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:4px 2px 18px}
-    .brand{font-size:18px;letter-spacing:-.04em;font-weight:600}
+    .brand{font-size:17px;letter-spacing:-.035em;font-weight:600;display:flex;align-items:flex-start;gap:2px}.brand sup{font-size:8px;line-height:1;position:relative;top:1px}
     .phasebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .phase{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9a9a94;padding:8px 10px;border-radius:999px;border:1px solid transparent}
     .phase.active{color:var(--ink);border-color:var(--ink);background:#fff}
     .frame{background:var(--panel);border:1px solid var(--line);border-radius:26px;overflow:hidden;display:grid;grid-template-columns:minmax(285px,320px) minmax(0,1fr)}
-    .rail{padding:28px 26px 24px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;gap:26px;background:#fbfbf8}
+    .rail{padding:28px 26px 24px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:flex-start;gap:26px;background:#fbfbf8}
     .eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--muted)}
-    .rail h1{font-size:clamp(30px,3.3vw,43px);line-height:1.01;letter-spacing:-.052em;margin:12px 0 14px;font-weight:500;max-width:8.5ch}
+    .rail h1{font-size:clamp(28px,2.7vw,40px);line-height:1.02;letter-spacing:-.05em;margin:12px 0 14px;font-weight:500;max-width:none}.headline-line{display:block;white-space:nowrap}
     .rail p{margin:0;color:var(--muted);font-size:13px;line-height:1.55;max-width:31ch}
     .rail-meta{display:grid;gap:10px}
     .rail-meta-item{padding-top:10px;border-top:1px solid var(--line)}
@@ -86,7 +86,7 @@
       .phase{font-size:9px;padding:6px 7px}
       .frame{grid-template-columns:1fr;min-height:0;border-radius:22px}
       .rail{border-right:0;border-bottom:1px solid var(--line);padding:24px 20px;display:block}
-      .rail h1{font-size:34px;max-width:none;margin:10px 0 12px}
+      .rail h1{font-size:34px;max-width:none;margin:10px 0 12px}.headline-line{white-space:normal}
       .rail p{max-width:42ch}
       .rail-meta{display:none}
       .progress-wrap{padding:20px 20px 0}
@@ -104,7 +104,7 @@
 <body>
   <main class="shell">
     <header class="topbar">
-      <div class="brand">LÅTCH</div>
+      <div class="brand">LATCH STUDIO<sup>®</sup></div>
       <nav class="phasebar" aria-label="LÅTCH project phases">
         <span class="phase active">01 Discover</span>
         <span class="phase">02 Debrief</span>
@@ -117,14 +117,10 @@
       <aside class="rail">
         <div>
           <div class="eyebrow">Client Discovery</div>
-          <h1>Before we design, we listen.</h1>
+          <h1><span class="headline-line">Before we design,</span><span class="headline-line">we listen.</span></h1>
           <p>This is where we understand the business, the people, the ambition, and the world the work needs to live in.</p>
         </div>
-        <div class="rail-meta">
-          <div class="rail-meta-item"><strong>Adaptive</strong><span>Your questions change based on the work you select.</span></div>
-          <div class="rail-meta-item"><strong>Focused</strong><span>One question at a time. No giant questionnaire.</span></div>
-          <div class="rail-meta-item"><strong>Prototype</strong><span>Responses remain in this browser and are not submitted to LÅTCH.</span></div>
-        </div>
+
       </aside>
 
       <div class="main">
@@ -181,7 +177,7 @@
           <footer class="actions">
             <div class="actions-left">
               <button type="button" class="btn hidden" id="backBtn">Back</button>
-              <span class="status" id="saveStatus">Prototype mode · not submitted</span>
+              
             </div>
             <div class="actions-right">
               <button type="submit" class="btn primary" id="nextBtn">Begin Discover →</button>
