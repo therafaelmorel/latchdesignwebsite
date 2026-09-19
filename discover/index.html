@@ -57,6 +57,29 @@
     .service[aria-pressed="true"]::after{content:"✓";position:absolute;right:16px;top:14px;font-size:12px}
     .service strong{display:block;font-size:13.5px;font-weight:500;margin-bottom:6px}
     .service span{display:block;color:var(--muted);font-size:11.5px;line-height:1.45;max-width:36ch}
+    .chat-stage{padding:26px 38px 0;min-height:560px}
+    .chat-shell{width:min(930px,100%);display:flex;flex-direction:column;min-height:535px}
+    .conversation{flex:1;display:flex;flex-direction:column;gap:28px;padding:10px 0 32px;overflow:auto;scrollbar-width:none}
+    .conversation::-webkit-scrollbar{display:none}
+    .exchange{display:flex;flex-direction:column;gap:13px}
+    .studio-message{max-width:720px}
+    .message-label{font-size:9px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--muted);margin-bottom:7px}
+    .message-question{font-size:clamp(24px,3vw,36px);line-height:1.08;letter-spacing:-.042em;font-weight:500}
+    .message-help{font-size:12px;line-height:1.5;color:var(--muted);margin-top:9px;max-width:610px}
+    .client-message{align-self:flex-end;max-width:min(680px,82%);background:#f3f3ef;border-radius:18px 18px 4px 18px;padding:14px 17px;font-size:14px;line-height:1.55;white-space:pre-wrap}
+    .composer{position:sticky;bottom:0;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 18%);padding:24px 0 24px}
+    .composer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+    .composer-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+    .composer-hint{font-size:10px;color:#a0a09a;letter-spacing:0;text-transform:none}
+    .chat-back{border:0;background:transparent;padding:0;color:var(--muted);font-size:11px}
+    .chat-back:hover{color:var(--ink)}
+    .composer-box{display:flex;align-items:flex-end;gap:10px;border:1px solid var(--line);border-radius:18px;padding:10px 10px 10px 16px;background:#fff;box-shadow:0 10px 34px rgba(0,0,0,.035)}
+    .composer-box textarea{flex:1;width:100%;min-height:30px;max-height:150px;margin:0;border:0;background:transparent;padding:5px 0;font-size:14px;line-height:1.5;resize:none;outline:none}
+    .composer-box textarea:focus{border:0}
+    .send-btn{width:38px;height:38px;flex:0 0 38px;border-radius:999px;border:0;background:var(--ink);color:#fff;font-size:17px;display:grid;place-items:center;transition:transform .16s ease,opacity .16s ease}
+    .send-btn:hover{transform:translateX(1px)}
+    .send-btn:disabled{opacity:.28;cursor:not-allowed}
+    .chat-error{margin-top:7px}
     .field{margin-top:34px}
     .question{font-size:clamp(29px,4.8vw,52px);line-height:1.06;letter-spacing:-.052em;font-weight:500;margin:0;max-width:15ch}
     .help{margin:16px 0 0;color:var(--muted);font-size:13px;line-height:1.55;max-width:620px}
@@ -91,6 +114,12 @@
       .rail-meta{display:none}
       .progress-wrap{padding:20px 20px 0}
       .stage{padding:36px 20px 24px}
+      .chat-stage{padding:24px 20px 0;min-height:0}
+      .chat-shell{min-height:520px}
+      .conversation{gap:24px;padding-bottom:24px}
+      .message-question{font-size:28px}
+      .client-message{max-width:90%}
+      .composer{padding-bottom:18px}
       .stage-inner{margin:0}
       .service-grid{grid-template-columns:1fr}
       .actions{padding:18px 20px 22px}
@@ -146,15 +175,19 @@
             </div>
           </section>
 
-          <section class="stage hidden" id="questionStage">
-            <div class="stage-inner">
-              <div class="kicker" id="questionCategory">Business</div>
-              <h2 class="question" id="questionText"></h2>
-              <p class="help" id="questionHelp"></p>
-              <div class="field">
-                <label class="hidden" for="answer">Your response</label>
-                <textarea id="answer" placeholder="Write freely. Short or detailed is fine."></textarea>
-                <div class="error" id="answerError"></div>
+          <section class="stage hidden chat-stage" id="questionStage">
+            <div class="chat-shell">
+              <div id="conversation" class="conversation" aria-live="polite"></div>
+              <div class="composer">
+                <div class="composer-top">
+                  <div class="composer-label">Your response <span class="composer-hint">Enter to send · Shift + Enter for a new line</span></div>
+                  <button type="button" class="chat-back" id="chatBackBtn">← Previous</button>
+                </div>
+                <div class="composer-box">
+                  <textarea id="answer" rows="1" placeholder="Type your response…"></textarea>
+                  <button type="button" class="send-btn" id="sendBtn" aria-label="Send response">→</button>
+                </div>
+                <div class="error chat-error" id="answerError"></div>
               </div>
             </div>
           </section>
@@ -255,9 +288,10 @@
       const serviceError = document.getElementById('serviceError');
       const answer = document.getElementById('answer');
       const answerError = document.getElementById('answerError');
-      const questionCategory = document.getElementById('questionCategory');
-      const questionText = document.getElementById('questionText');
-      const questionHelp = document.getElementById('questionHelp');
+      const conversation = document.getElementById('conversation');
+      const sendBtn = document.getElementById('sendBtn');
+      const chatBackBtn = document.getElementById('chatBackBtn');
+      const actions = document.querySelector('.actions');
       const backBtn = document.getElementById('backBtn');
       const nextBtn = document.getElementById('nextBtn');
       const progressFill = document.getElementById('progressFill');
@@ -318,6 +352,7 @@
         serviceStage.classList.remove('hidden');
         questionStage.classList.add('hidden');
         reviewStage.classList.add('hidden');
+        actions.classList.remove('hidden');
         backBtn.classList.add('hidden');
         nextBtn.classList.remove('hidden');
         nextBtn.textContent = 'Begin Discover →';
@@ -326,24 +361,80 @@
         save();
       }
 
+      function renderConversation(){
+        conversation.innerHTML = '';
+        for(let i=0;i<=state.index;i++){
+          const item = state.questions[i];
+          if(!item) continue;
+          const exchange = document.createElement('div');
+          exchange.className = 'exchange';
+
+          const studio = document.createElement('div');
+          studio.className = 'studio-message';
+          const label = document.createElement('div');
+          label.className = 'message-label';
+          label.textContent = 'LATCH STUDIO · ' + item.cat;
+          const q = document.createElement('div');
+          q.className = 'message-question';
+          q.textContent = item.q;
+          const h = document.createElement('div');
+          h.className = 'message-help';
+          h.textContent = item.h;
+          studio.append(label,q,h);
+          exchange.appendChild(studio);
+
+          if(i < state.index && state.answers[i]){
+            const client = document.createElement('div');
+            client.className = 'client-message';
+            client.textContent = state.answers[i];
+            exchange.appendChild(client);
+          }
+          conversation.appendChild(exchange);
+        }
+        requestAnimationFrame(() => {
+          conversation.scrollTop = conversation.scrollHeight;
+        });
+      }
+
+      function autoGrow(){
+        answer.style.height = 'auto';
+        answer.style.height = Math.min(answer.scrollHeight,150) + 'px';
+      }
+
       function showQuestion(){
         state.stage = 'questions';
         serviceStage.classList.add('hidden');
         questionStage.classList.remove('hidden');
         reviewStage.classList.add('hidden');
-        backBtn.classList.remove('hidden');
-        nextBtn.classList.remove('hidden');
-        const item = state.questions[state.index];
-        questionCategory.textContent = item.cat;
-        questionText.textContent = item.q;
-        questionHelp.textContent = item.h;
+        actions.classList.add('hidden');
+        backBtn.classList.add('hidden');
         answer.value = state.answers[state.index] || '';
         answerError.textContent = '';
-        nextBtn.textContent = state.index === state.questions.length - 1 ? 'Review Discover →' : 'Continue →';
+        sendBtn.disabled = !answer.value.trim();
+        chatBackBtn.style.visibility = state.index === 0 ? 'visible' : 'visible';
+        renderConversation();
+        autoGrow();
         updateProgress();
         save();
-        window.scrollTo({top:0,behavior:'smooth'});
         setTimeout(() => answer.focus({preventScroll:true}), 40);
+      }
+
+      function sendCurrent(){
+        const value = answer.value.trim();
+        if(!value){
+          answerError.textContent = 'Write a response before sending. If it does not apply, enter “N/A”.';
+          answer.focus();
+          return;
+        }
+        state.answers[state.index] = value;
+        answerError.textContent = '';
+        if(state.index < state.questions.length - 1){
+          state.index += 1;
+          answer.value = '';
+          showQuestion();
+        }else{
+          showReview();
+        }
       }
 
       function makeReviewRow(label, question, response){
@@ -369,6 +460,7 @@
         serviceStage.classList.add('hidden');
         questionStage.classList.add('hidden');
         reviewStage.classList.remove('hidden');
+        actions.classList.add('hidden');
         backBtn.classList.remove('hidden');
         nextBtn.classList.add('hidden');
         reviewList.innerHTML = '';
@@ -400,45 +492,40 @@
           buildQuestions(false);
           state.index = 0;
           showQuestion();
+        }
+      });
+
+      sendBtn.addEventListener('click', sendCurrent);
+
+      answer.addEventListener('keydown', e => {
+        if(e.key === 'Enter' && !e.shiftKey && !e.isComposing){
+          e.preventDefault();
+          sendCurrent();
+        }
+      });
+
+      chatBackBtn.addEventListener('click', () => {
+        if(state.index === 0){
+          showServices();
           return;
         }
-        if(state.stage === 'questions'){
-          const value = answer.value.trim();
-          if(!value){
-            answerError.textContent = 'Add a response before continuing. If it does not apply, enter “N/A”.';
-            answer.focus();
-            return;
-          }
-          state.answers[state.index] = value;
-          if(state.index < state.questions.length - 1){
-            state.index += 1;
-            showQuestion();
-          }else{
-            showReview();
-          }
-        }
+        state.answers[state.index] = answer.value.trim();
+        state.index -= 1;
+        showQuestion();
       });
 
       backBtn.addEventListener('click', () => {
         if(state.stage === 'review'){
           state.index = Math.max(0, state.questions.length - 1);
           showQuestion();
-          return;
-        }
-        if(state.stage === 'questions'){
-          state.answers[state.index] = answer.value.trim();
-          if(state.index > 0){
-            state.index -= 1;
-            showQuestion();
-          }else{
-            showServices();
-          }
         }
       });
 
       answer.addEventListener('input', () => {
         state.answers[state.index] = answer.value;
         answerError.textContent = '';
+        sendBtn.disabled = !answer.value.trim();
+        autoGrow();
         save();
       });
 
