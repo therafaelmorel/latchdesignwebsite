@@ -25,6 +25,79 @@
     button,input,textarea{font:inherit}
     button{cursor:pointer}
     a{color:inherit}
+    .intro-loader{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:grid;
+      place-items:center;
+      background:#fff;
+      opacity:1;
+      visibility:visible;
+      transition:opacity .65s cubic-bezier(.22,.61,.36,1),visibility .65s step-end;
+    }
+    .intro-loader.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
+    .intro-loader.is-hidden{display:none}
+    .loader-logo{
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      gap:.055em;
+      color:#111;
+      font-size:clamp(28px,3.2vw,46px);
+      font-weight:600;
+      letter-spacing:-.045em;
+      line-height:1;
+      user-select:none;
+    }
+    .flip-char{
+      position:relative;
+      display:inline-grid;
+      place-items:center;
+      min-width:.58em;
+      height:1.08em;
+      overflow:hidden;
+      perspective:500px;
+    }
+    .flip-char.space{min-width:.34em}
+    .flip-char sup{
+      font-size:.34em;
+      line-height:1;
+      align-self:start;
+      margin-top:.06em;
+    }
+    .flip-char .glyph{
+      display:block;
+      transform-origin:50% 50%;
+      backface-visibility:hidden;
+      will-change:transform,opacity;
+    }
+    .flip-char.flipping .glyph{
+      animation:splitFlap .105s cubic-bezier(.55,.05,.55,.95);
+    }
+    @keyframes splitFlap{
+      0%{transform:rotateX(0deg);opacity:1}
+      45%{transform:rotateX(-86deg);opacity:.2}
+      55%{transform:rotateX(86deg);opacity:.2}
+      100%{transform:rotateX(0deg);opacity:1}
+    }
+    .loader-rule{
+      width:min(260px,52vw);
+      height:1px;
+      margin:22px auto 0;
+      background:#e7e7e2;
+      transform:scaleX(0);
+      transform-origin:center;
+      animation:loaderRule 1s .45s cubic-bezier(.22,.61,.36,1) forwards;
+    }
+    @keyframes loaderRule{to{transform:scaleX(1)}}
+    body.loader-lock{overflow:hidden}
+    @media(prefers-reduced-motion:reduce){
+      .flip-char.flipping .glyph{animation:none}
+      .loader-rule{animation:none;transform:scaleX(1)}
+      .intro-loader{transition:none}
+    }
+
     .shell{width:min(1420px,calc(100% - 40px));margin:0 auto;padding:20px 0 28px}
     .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:4px 2px 18px}
     .brand{font-size:17px;letter-spacing:-.035em;font-weight:600;display:flex;align-items:flex-start;gap:2px}.brand sup{font-size:8px;line-height:1;position:relative;top:1px}
@@ -138,7 +211,13 @@
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.progress-fill,.service{transition:none}}
   </style>
 </head>
-<body>
+<body class="loader-lock">
+  <div class="intro-loader" id="introLoader" aria-label="LATCH STUDIO loading">
+    <div>
+      <div class="loader-logo" id="loaderLogo" aria-hidden="true"></div>
+      <div class="loader-rule"></div>
+    </div>
+  </div>
   <main class="shell">
     <header class="topbar">
       <div class="brand">LATCH STUDIO<sup>®</sup></div>
@@ -231,6 +310,81 @@
 
   <script>
     (() => {
+      const introLoader = document.getElementById('introLoader');
+      const loaderLogo = document.getElementById('loaderLogo');
+      const loaderSessionKey = 'latch-discover-intro-seen';
+      const finalLogo = 'LATCH STUDIO®';
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+      function buildLoaderLogo(){
+        if(!loaderLogo) return [];
+        loaderLogo.innerHTML = '';
+        return [...finalLogo].map((char,index) => {
+          const cell = document.createElement('span');
+          cell.className = 'flip-char' + (char === ' ' ? ' space' : '');
+          const glyph = document.createElement('span');
+          glyph.className = 'glyph';
+          glyph.textContent = char === ' ' ? ' ' : chars[Math.floor(Math.random()*chars.length)];
+          if(char === '®'){
+            glyph.innerHTML = '<sup>®</sup>';
+          }
+          cell.appendChild(glyph);
+          loaderLogo.appendChild(cell);
+          return {cell,glyph,target:char,index};
+        });
+      }
+
+      function finishIntro(){
+        if(!introLoader) return;
+        introLoader.classList.add('is-leaving');
+        document.body.classList.remove('loader-lock');
+        try{sessionStorage.setItem(loaderSessionKey,'1')}catch(e){}
+        setTimeout(() => introLoader.classList.add('is-hidden'),700);
+      }
+
+      function runIntro(){
+        if(!introLoader) return;
+        let seen = false;
+        try{seen = sessionStorage.getItem(loaderSessionKey) === '1'}catch(e){}
+        if(seen){
+          introLoader.classList.add('is-hidden');
+          document.body.classList.remove('loader-lock');
+          return;
+        }
+
+        const cells = buildLoaderLogo();
+        let tick = 0;
+        const maxTicks = 16;
+
+        const timer = setInterval(() => {
+          tick++;
+          cells.forEach(({cell,glyph,target,index}) => {
+            if(target === ' ') return;
+            const settleAt = 7 + Math.floor(index * .65);
+            if(tick >= settleAt){
+              if(target === '®') glyph.innerHTML = '<sup>®</sup>';
+              else glyph.textContent = target;
+            }else{
+              glyph.textContent = chars[Math.floor(Math.random()*chars.length)];
+            }
+            cell.classList.remove('flipping');
+            void cell.offsetWidth;
+            cell.classList.add('flipping');
+          });
+
+          if(tick >= maxTicks){
+            clearInterval(timer);
+            cells.forEach(({glyph,target}) => {
+              if(target === '®') glyph.innerHTML = '<sup>®</sup>';
+              else glyph.textContent = target;
+            });
+            setTimeout(finishIntro,520);
+          }
+        },92);
+      }
+
+      runIntro();
+
       const STORAGE_KEY = 'latch-discover-prototype-v1';
       const serviceNames = {
         branding: 'Brand Identity',
