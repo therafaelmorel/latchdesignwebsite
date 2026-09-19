@@ -59,7 +59,7 @@
     .service span{display:block;color:var(--muted);font-size:11.5px;line-height:1.45;max-width:36ch}
     .chat-stage{padding:26px 38px 0;min-height:560px}
     .chat-shell{width:min(930px,100%);display:flex;flex-direction:column;min-height:535px}
-    .conversation{flex:1;display:flex;flex-direction:column;gap:28px;padding:10px 0 32px;overflow:auto;scrollbar-width:none}
+    .conversation{flex:1;display:flex;flex-direction:column;gap:28px;padding:10px 4px 28px 0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;scroll-behavior:smooth;overscroll-behavior:contain}
     .conversation::-webkit-scrollbar{display:none}
     .exchange{display:flex;flex-direction:column;gap:13px}
     .studio-message{max-width:720px}
@@ -67,7 +67,7 @@
     .message-question{font-size:clamp(24px,3vw,36px);line-height:1.08;letter-spacing:-.042em;font-weight:500}
     .message-help{font-size:12px;line-height:1.5;color:var(--muted);margin-top:9px;max-width:610px}
     .client-message{align-self:flex-end;max-width:min(680px,82%);background:#f3f3ef;border-radius:18px 18px 4px 18px;padding:14px 17px;font-size:14px;line-height:1.55;white-space:pre-wrap}
-    .composer{position:sticky;bottom:0;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 18%);padding:24px 0 24px}
+    .composer{flex:0 0 auto;background:#fff;padding:16px 0 20px}
     .composer-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
     .composer-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
     .composer-hint{font-size:10px;color:#a0a09a;letter-spacing:0;text-transform:none}
@@ -102,6 +102,14 @@
     .finish{padding:20px 0 6px;display:flex;gap:10px;flex-wrap:wrap}
     .note{font-size:11px;color:var(--muted);line-height:1.5;max-width:650px;margin-top:18px}
     .hidden{display:none !important}
+    @media(min-width:761px){
+      .frame{height:clamp(650px,calc(100vh - 96px),840px)}
+      .main{min-height:0;overflow:hidden}
+      #form{display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden}
+      #questionStage{min-height:0;flex:1;overflow:hidden}
+      .chat-shell{height:100%;min-height:0}
+      .conversation{min-height:0}
+    }
     @media(min-width:1400px){.shell{width:min(1540px,calc(100% - 64px))}}\n    @media(max-width:760px){
       .shell{width:min(100% - 18px,1180px);padding-top:10px}
       .topbar{padding:10px 4px 18px;align-items:flex-start}
@@ -392,7 +400,10 @@
           conversation.appendChild(exchange);
         }
         requestAnimationFrame(() => {
-          conversation.scrollTop = conversation.scrollHeight;
+          conversation.scrollTo({
+            top: conversation.scrollHeight,
+            behavior: 'smooth'
+          });
         });
       }
 
@@ -416,7 +427,7 @@
         autoGrow();
         updateProgress();
         save();
-        setTimeout(() => answer.focus({preventScroll:true}), 40);
+        setTimeout(() => answer.focus({preventScroll:true}), 120);
       }
 
       function sendCurrent(){
