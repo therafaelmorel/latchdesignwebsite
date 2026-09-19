@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LÅTCH — Discover</title>
+  <meta name="description" content="LÅTCH Design Studio client discovery prototype." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f6f3;
+      --panel:#ffffff;
+      --ink:#111111;
+      --muted:#74746f;
+      --line:#dcdcd6;
+      --soft:#ecece7;
+      --accent:#111111;
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{margin:0;min-height:100vh;background:var(--bg)}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .shell{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:26px 0 36px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:6px 0 24px}
+    .brand{font-size:18px;letter-spacing:-.04em;font-weight:600}
+    .phasebar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .phase{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#9a9a94;padding:8px 10px;border-radius:999px;border:1px solid transparent}
+    .phase.active{color:var(--ink);border-color:var(--ink);background:#fff}
+    .frame{background:var(--panel);border:1px solid var(--line);border-radius:28px;overflow:hidden;min-height:700px;display:grid;grid-template-columns:minmax(220px,.72fr) minmax(0,1.85fr)}
+    .rail{padding:32px 28px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;gap:32px;background:#fbfbf8}
+    .eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--muted)}
+    .rail h1{font-size:clamp(28px,4vw,46px);line-height:.98;letter-spacing:-.055em;margin:14px 0 16px;font-weight:500;max-width:8ch}
+    .rail p{margin:0;color:var(--muted);font-size:13px;line-height:1.6;max-width:28ch}
+    .rail-meta{display:grid;gap:16px}
+    .rail-meta-item{padding-top:14px;border-top:1px solid var(--line)}
+    .rail-meta-item strong{display:block;font-size:12px;font-weight:500;margin-bottom:4px}
+    .rail-meta-item span{display:block;font-size:11px;color:var(--muted);line-height:1.45}
+    .main{min-width:0;display:flex;flex-direction:column}
+    .progress-wrap{padding:28px 34px 0}
+    .progress-top{display:flex;justify-content:space-between;align-items:center;gap:18px;color:var(--muted);font-size:11px}
+    .progress-track{height:1px;background:var(--soft);margin-top:16px;overflow:hidden}
+    .progress-fill{height:100%;background:var(--ink);width:0;transition:width .28s ease}
+    .stage{padding:52px 34px 34px;display:flex;flex-direction:column;flex:1}
+    .stage-inner{width:min(760px,100%);margin:auto 0}
+    .kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--muted);margin-bottom:18px}
+    .stage h2{font-size:clamp(30px,5vw,58px);line-height:1.02;letter-spacing:-.055em;font-weight:500;margin:0;max-width:12ch}
+    .stage .lede{font-size:15px;line-height:1.65;color:var(--muted);max-width:610px;margin:20px 0 0}
+    .service-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:32px}
+    .service{appearance:none;border:1px solid var(--line);background:#fff;border-radius:16px;text-align:left;padding:18px;min-height:112px;transition:.18s ease;position:relative;color:var(--ink)}
+    .service:hover{border-color:#999}
+    .service[aria-pressed="true"]{border-color:var(--ink);background:#f4f4ef}
+    .service[aria-pressed="true"]::after{content:"✓";position:absolute;right:16px;top:14px;font-size:12px}
+    .service strong{display:block;font-size:14px;font-weight:500;margin-bottom:8px}
+    .service span{display:block;color:var(--muted);font-size:12px;line-height:1.5;max-width:31ch}
+    .field{margin-top:34px}
+    .question{font-size:clamp(29px,4.8vw,52px);line-height:1.06;letter-spacing:-.052em;font-weight:500;margin:0;max-width:15ch}
+    .help{margin:16px 0 0;color:var(--muted);font-size:13px;line-height:1.55;max-width:620px}
+    textarea{display:block;width:100%;min-height:176px;margin-top:30px;border:0;border-bottom:1px solid var(--ink);border-radius:0;background:transparent;color:var(--ink);font-size:18px;line-height:1.55;padding:12px 0 16px;resize:vertical;outline:none}
+    textarea::placeholder{color:#b4b4ad}
+    textarea:focus{border-bottom-width:2px}
+    .actions{padding:22px 34px 30px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--soft);flex-wrap:wrap}
+    .actions-left,.actions-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{min-height:46px;border-radius:999px;padding:0 18px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;font-weight:500}
+    .btn.primary{background:var(--ink);color:#fff;border-color:var(--ink);padding-inline:22px}
+    .btn.text{border-color:transparent;background:transparent;color:var(--muted);padding-inline:8px}
+    .btn:disabled{opacity:.42;cursor:not-allowed}
+    .status{font-size:11px;color:var(--muted)}
+    .error{font-size:12px;color:#8b2f2f;margin-top:12px;min-height:18px}
+    .review{width:100%;display:grid;gap:0;border-top:1px solid var(--line);margin-top:28px}
+    .review-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:24px;padding:22px 0;border-bottom:1px solid var(--line)}
+    .review-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+    .review-q{font-size:13px;font-weight:500;line-height:1.45;margin-bottom:8px}
+    .review-a{font-size:13px;color:var(--muted);line-height:1.65;white-space:pre-wrap}
+    .finish{padding:20px 0 6px;display:flex;gap:10px;flex-wrap:wrap}
+    .note{font-size:11px;color:var(--muted);line-height:1.5;max-width:650px;margin-top:18px}
+    .hidden{display:none !important}
+    @media(max-width:760px){
+      .shell{width:min(100% - 18px,1180px);padding-top:10px}
+      .topbar{padding:10px 4px 18px;align-items:flex-start}
+      .phasebar{gap:2px;max-width:70%;justify-content:flex-end}
+      .phase{font-size:9px;padding:6px 7px}
+      .frame{grid-template-columns:1fr;min-height:0;border-radius:22px}
+      .rail{border-right:0;border-bottom:1px solid var(--line);padding:24px 20px;display:block}
+      .rail h1{font-size:34px;max-width:none;margin:10px 0 12px}
+      .rail p{max-width:42ch}
+      .rail-meta{display:none}
+      .progress-wrap{padding:20px 20px 0}
+      .stage{padding:36px 20px 24px}
+      .stage-inner{margin:0}
+      .service-grid{grid-template-columns:1fr}
+      .actions{padding:18px 20px 22px}
+      .question{font-size:34px;max-width:none}
+      textarea{font-size:16px;min-height:145px}
+      .review-row{grid-template-columns:1fr;gap:9px}
+    }
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.progress-fill,.service{transition:none}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">LÅTCH</div>
+      <nav class="phasebar" aria-label="LÅTCH project phases">
+        <span class="phase active">01 Discover</span>
+        <span class="phase">02 Debrief</span>
+        <span class="phase">03 Design</span>
+        <span class="phase">04 Deliver</span>
+      </nav>
+    </header>
+
+    <section class="frame" aria-live="polite">
+      <aside class="rail">
+        <div>
+          <div class="eyebrow">Client Discovery</div>
+          <h1>Before we design, we listen.</h1>
+          <p>This is where we understand the business, the people, the ambition, and the world the work needs to live in.</p>
+        </div>
+        <div class="rail-meta">
+          <div class="rail-meta-item"><strong>Adaptive</strong><span>Your questions change based on the work you select.</span></div>
+          <div class="rail-meta-item"><strong>Focused</strong><span>One question at a time. No giant questionnaire.</span></div>
+          <div class="rail-meta-item"><strong>Prototype</strong><span>Responses remain in this browser and are not submitted to LÅTCH.</span></div>
+        </div>
+      </aside>
+
+      <div class="main">
+        <div class="progress-wrap">
+          <div class="progress-top"><span id="sectionLabel">Start</span><span id="counter">Discover</span></div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+
+        <form id="form" autocomplete="off" novalidate>
+          <section class="stage" id="serviceStage">
+            <div class="stage-inner">
+              <div class="kicker">Your project</div>
+              <h2>What are we building together?</h2>
+              <p class="lede">Select one or more disciplines. We’ll shape the discovery around the work instead of asking you questions that do not apply.</p>
+              <div class="service-grid" id="serviceGrid">
+                <button type="button" class="service" data-service="branding" aria-pressed="false"><strong>Brand Identity</strong><span>Strategy, positioning, visual identity, voice, applications.</span></button>
+                <button type="button" class="service" data-service="website" aria-pressed="false"><strong>Website</strong><span>Digital experience, content, functionality, motion, launch.</span></button>
+                <button type="button" class="service" data-service="interiors" aria-pressed="false"><strong>Interiors / Space</strong><span>Experience, planning, materiality, environment, operations.</span></button>
+                <button type="button" class="service" data-service="product" aria-pressed="false"><strong>Digital Product</strong><span>Product thinking, user journeys, UI/UX, systems.</span></button>
+                <button type="button" class="service" data-service="creative" aria-pressed="false"><strong>Creative Direction</strong><span>Campaigns, art direction, visual worlds, content systems.</span></button>
+              </div>
+              <div class="error" id="serviceError"></div>
+            </div>
+          </section>
+
+          <section class="stage hidden" id="questionStage">
+            <div class="stage-inner">
+              <div class="kicker" id="questionCategory">Business</div>
+              <h2 class="question" id="questionText"></h2>
+              <p class="help" id="questionHelp"></p>
+              <div class="field">
+                <label class="hidden" for="answer">Your response</label>
+                <textarea id="answer" placeholder="Write freely. Short or detailed is fine."></textarea>
+                <div class="error" id="answerError"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="stage hidden" id="reviewStage">
+            <div class="stage-inner" style="width:100%">
+              <div class="kicker">Discovery snapshot</div>
+              <h2 style="max-width:13ch">You’ve given us the starting point.</h2>
+              <p class="lede">This is the raw material LÅTCH would turn into your Debrief: the project definition, priorities, creative principles, constraints, scope, and measure of success.</p>
+              <div class="review" id="reviewList"></div>
+              <div class="finish">
+                <button class="btn" type="button" id="downloadBtn">Download responses</button>
+                <button class="btn" type="button" id="editBtn">Edit answers</button>
+                <button class="btn text" type="button" id="resetBtn">Start over</button>
+              </div>
+              <p class="note">Testing note: this prototype does not send responses anywhere. A production version can save the submission to LÅTCH Rover, email a structured brief, or create the client project automatically.</p>
+            </div>
+          </section>
+
+          <footer class="actions">
+            <div class="actions-left">
+              <button type="button" class="btn hidden" id="backBtn">Back</button>
+              <span class="status" id="saveStatus">Prototype mode · not submitted</span>
+            </div>
+            <div class="actions-right">
+              <button type="submit" class="btn primary" id="nextBtn">Begin Discover →</button>
+            </div>
+          </footer>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = 'latch-discover-prototype-v1';
+      const serviceNames = {
+        branding: 'Brand Identity',
+        website: 'Website',
+        interiors: 'Interiors / Space',
+        product: 'Digital Product',
+        creative: 'Creative Direction'
+      };
+
+      const core = [
+        {cat:'You', q:'Tell us about your company in your own words.', h:'No polished elevator pitch needed. Tell us what you actually do and why it matters.'},
+        {cat:'Business', q:'Why are you doing this project now?', h:'What changed, what is no longer working, or what opportunity are you trying to capture?'},
+        {cat:'Future', q:'Where do you want the business to be in the next 1–3 years?', h:'Think beyond this project. We want to understand what the work needs to support.'},
+        {cat:'Audience', q:'Who are you really trying to reach?', h:'Describe your ideal client, customer, guest, resident, user, or community.'},
+        {cat:'Positioning', q:'Why should someone choose you instead of an alternative?', h:'What feels genuinely different about the experience, product, service, or point of view?'},
+        {cat:'Perception', q:'How should someone feel after interacting with your brand?', h:'Think emotionally rather than visually.'},
+        {cat:'Taste', q:'Give us 3–5 words the work should feel like — and 3–5 words it should never feel like.', h:'For example: precise, warm, editorial / never corporate, trendy, loud.'},
+        {cat:'References', q:'What brands, spaces, websites, objects, films, publications, or cultural references feel aligned with your taste?', h:'Tell us what you like about them rather than only listing names.'},
+        {cat:'Constraints', q:'What are we absolutely allowed to change — and what must remain?', h:'Include existing assets, stakeholder requirements, technical realities, timing, or brand equity.'},
+        {cat:'Success', q:'If we do our job exceptionally well, what changes for you?', h:'This is the most important question. What becomes possible after this project?'}
+      ];
+
+      const modules = {
+        branding: [
+          {cat:'Brand', q:'What does your current identity communicate correctly — and what does it get wrong?', h:'If this is a new brand, tell us what perception you want to establish from day one.'},
+          {cat:'Brand', q:'What should someone understand about the company within five seconds of seeing the identity?', h:'Focus on the immediate impression, before they know every detail.'},
+          {cat:'Personality', q:'If the brand were a person, how would they speak, dress, behave, and enter a room?', h:'This gives us more useful direction than choosing a visual style too early.'},
+          {cat:'Identity', q:'Where will the identity live most often?', h:'Packaging, digital, signage, social, print, merchandise, uniforms, environmental graphics, or elsewhere.'}
+        ],
+        website: [
+          {cat:'Website', q:'What is the single most important job of the website?', h:'What should a visitor understand, feel, or do?'},
+          {cat:'Website', q:'What is the primary action you want a visitor to take?', h:'For example: inquire, purchase, book, explore work, apply, join, or contact.'},
+          {cat:'Experience', q:'What should someone feel in the first few seconds after the site loads?', h:'Describe the experience, not the layout.'},
+          {cat:'Functionality', q:'What does the website need to do beyond presenting information?', h:'Include ecommerce, CMS, accounts, payments, booking, forms, search, integrations, portals, or analytics.'},
+          {cat:'Content', q:'What content already exists, and what still needs to be created?', h:'Think copy, photography, video, case studies, products, team information, testimonials, and existing pages.'}
+        ],
+        interiors: [
+          {cat:'Space', q:'What happens in the space throughout a typical day?', h:'Walk us through who arrives, what they do, and where the current experience succeeds or breaks down.'},
+          {cat:'Space', q:'How should someone feel when they enter the space?', h:'Think about atmosphere, pace, energy, intimacy, and memory.'},
+          {cat:'Program', q:'What functions or spaces are non-negotiable?', h:'Include operational, guest, staff, storage, accessibility, technology, or specialty requirements.'},
+          {cat:'Materiality', q:'What materials, environments, or spatial references are you drawn to — and what do you dislike?', h:'References can come from architecture, hospitality, fashion, art, or nature.'}
+        ],
+        product: [
+          {cat:'Product', q:'What problem does the product solve, and who experiences that problem?', h:'Describe the real behavior or frustration behind the product.'},
+          {cat:'Journey', q:'What is the most important thing a user should be able to accomplish?', h:'Focus on the core journey before secondary features.'},
+          {cat:'Experience', q:'What should the product feel easier, faster, clearer, or better than?', h:'This can be an existing workflow, competitor, spreadsheet, email process, or current product.'},
+          {cat:'Technology', q:'What functionality, systems, or integrations already exist?', h:'Include authentication, APIs, databases, roles, payments, analytics, or existing design systems.'}
+        ],
+        creative: [
+          {cat:'Creative', q:'What are we communicating, and why should someone care now?', h:'Give us the essential idea before we discuss execution.'},
+          {cat:'Campaign', q:'Where will this creative world live?', h:'Campaign, launch, social, video, photography, print, digital, events, retail, or a combination.'},
+          {cat:'Message', q:'What is the one idea the audience should remember?', h:'If everything else disappeared, what must remain?'},
+          {cat:'References', q:'What cultural references capture the world you want to create?', h:'Film, music, fashion, art, photography, architecture, publishing, or something unexpected.'}
+        ]
+      };
+
+      const state = {stage:'services', services:[], questions:[], answers:[], index:0};
+
+      const form = document.getElementById('form');
+      const serviceStage = document.getElementById('serviceStage');
+      const questionStage = document.getElementById('questionStage');
+      const reviewStage = document.getElementById('reviewStage');
+      const serviceError = document.getElementById('serviceError');
+      const answer = document.getElementById('answer');
+      const answerError = document.getElementById('answerError');
+      const questionCategory = document.getElementById('questionCategory');
+      const questionText = document.getElementById('questionText');
+      const questionHelp = document.getElementById('questionHelp');
+      const backBtn = document.getElementById('backBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const progressFill = document.getElementById('progressFill');
+      const sectionLabel = document.getElementById('sectionLabel');
+      const counter = document.getElementById('counter');
+      const reviewList = document.getElementById('reviewList');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const editBtn = document.getElementById('editBtn');
+      const resetBtn = document.getElementById('resetBtn');
+
+      function save(){
+        try{localStorage.setItem(STORAGE_KEY, JSON.stringify({services:state.services,answers:state.answers,index:state.index,stage:state.stage}));}catch(e){}
+      }
+
+      function clearSaved(){
+        try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+      }
+
+      function buildQuestions(preserveAnswers=false){
+        const old = preserveAnswers ? [...state.answers] : [];
+        const questions = [...core];
+        state.services.forEach(s => questions.push(...(modules[s] || [])));
+        state.questions = questions;
+        state.answers = questions.map((_,i) => old[i] || '');
+      }
+
+      function selectedServices(){
+        return [...document.querySelectorAll('.service[aria-pressed="true"]')].map(el => el.dataset.service);
+      }
+
+      function syncServiceButtons(){
+        document.querySelectorAll('.service').forEach(btn => {
+          btn.setAttribute('aria-pressed', state.services.includes(btn.dataset.service) ? 'true' : 'false');
+        });
+      }
+
+      function updateProgress(){
+        if(state.stage === 'services'){
+          progressFill.style.width = '0%';
+          sectionLabel.textContent = 'Start';
+          counter.textContent = 'Discover';
+          return;
+        }
+        if(state.stage === 'questions'){
+          const pct = state.questions.length ? ((state.index + 1) / state.questions.length) * 100 : 0;
+          progressFill.style.width = pct + '%';
+          sectionLabel.textContent = state.questions[state.index]?.cat || 'Discover';
+          counter.textContent = String(state.index + 1).padStart(2,'0') + ' / ' + String(state.questions.length).padStart(2,'0');
+          return;
+        }
+        progressFill.style.width = '100%';
+        sectionLabel.textContent = 'Complete';
+        counter.textContent = 'Ready for Debrief';
+      }
+
+      function showServices(){
+        state.stage = 'services';
+        serviceStage.classList.remove('hidden');
+        questionStage.classList.add('hidden');
+        reviewStage.classList.add('hidden');
+        backBtn.classList.add('hidden');
+        nextBtn.classList.remove('hidden');
+        nextBtn.textContent = 'Begin Discover →';
+        syncServiceButtons();
+        updateProgress();
+        save();
+      }
+
+      function showQuestion(){
+        state.stage = 'questions';
+        serviceStage.classList.add('hidden');
+        questionStage.classList.remove('hidden');
+        reviewStage.classList.add('hidden');
+        backBtn.classList.remove('hidden');
+        nextBtn.classList.remove('hidden');
+        const item = state.questions[state.index];
+        questionCategory.textContent = item.cat;
+        questionText.textContent = item.q;
+        questionHelp.textContent = item.h;
+        answer.value = state.answers[state.index] || '';
+        answerError.textContent = '';
+        nextBtn.textContent = state.index === state.questions.length - 1 ? 'Review Discover →' : 'Continue →';
+        updateProgress();
+        save();
+        window.scrollTo({top:0,behavior:'smooth'});
+        setTimeout(() => answer.focus({preventScroll:true}), 40);
+      }
+
+      function makeReviewRow(label, question, response){
+        const row = document.createElement('div');
+        row.className = 'review-row';
+        const left = document.createElement('div');
+        left.className = 'review-label';
+        left.textContent = label;
+        const right = document.createElement('div');
+        const q = document.createElement('div');
+        q.className = 'review-q';
+        q.textContent = question;
+        const a = document.createElement('div');
+        a.className = 'review-a';
+        a.textContent = response || '—';
+        right.append(q,a);
+        row.append(left,right);
+        return row;
+      }
+
+      function showReview(){
+        state.stage = 'review';
+        serviceStage.classList.add('hidden');
+        questionStage.classList.add('hidden');
+        reviewStage.classList.remove('hidden');
+        backBtn.classList.remove('hidden');
+        nextBtn.classList.add('hidden');
+        reviewList.innerHTML = '';
+        reviewList.appendChild(makeReviewRow('Project', 'Selected disciplines', state.services.map(s => serviceNames[s]).join(' · ')));
+        state.questions.forEach((item,i) => reviewList.appendChild(makeReviewRow(item.cat, item.q, state.answers[i])));
+        updateProgress();
+        save();
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+
+      document.querySelectorAll('.service').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const next = btn.getAttribute('aria-pressed') !== 'true';
+          btn.setAttribute('aria-pressed', next ? 'true' : 'false');
+          state.services = selectedServices();
+          serviceError.textContent = '';
+          save();
+        });
+      });
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        if(state.stage === 'services'){
+          state.services = selectedServices();
+          if(!state.services.length){
+            serviceError.textContent = 'Choose at least one discipline to continue.';
+            return;
+          }
+          buildQuestions(false);
+          state.index = 0;
+          showQuestion();
+          return;
+        }
+        if(state.stage === 'questions'){
+          const value = answer.value.trim();
+          if(!value){
+            answerError.textContent = 'Add a response before continuing. If it does not apply, enter “N/A”.';
+            answer.focus();
+            return;
+          }
+          state.answers[state.index] = value;
+          if(state.index < state.questions.length - 1){
+            state.index += 1;
+            showQuestion();
+          }else{
+            showReview();
+          }
+        }
+      });
+
+      backBtn.addEventListener('click', () => {
+        if(state.stage === 'review'){
+          state.index = Math.max(0, state.questions.length - 1);
+          showQuestion();
+          return;
+        }
+        if(state.stage === 'questions'){
+          state.answers[state.index] = answer.value.trim();
+          if(state.index > 0){
+            state.index -= 1;
+            showQuestion();
+          }else{
+            showServices();
+          }
+        }
+      });
+
+      answer.addEventListener('input', () => {
+        state.answers[state.index] = answer.value;
+        answerError.textContent = '';
+        save();
+      });
+
+      editBtn.addEventListener('click', () => {
+        state.index = 0;
+        showQuestion();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        if(!confirm('Start this discovery again? Your current prototype responses will be cleared.')) return;
+        clearSaved();
+        state.services = [];
+        state.questions = [];
+        state.answers = [];
+        state.index = 0;
+        showServices();
+      });
+
+      downloadBtn.addEventListener('click', () => {
+        const lines = ['LÅTCH DESIGN STUDIO — DISCOVERY','', 'PROJECT', state.services.map(s => serviceNames[s]).join(' · '), ''];
+        state.questions.forEach((item,i) => {
+          lines.push(item.cat.toUpperCase());
+          lines.push(item.q);
+          lines.push(state.answers[i] || '—');
+          lines.push('');
+        });
+        const blob = new Blob([lines.join('
+')], {type:'text/plain;charset=utf-8'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'latch-discovery-responses.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      try{
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+        if(saved && Array.isArray(saved.services) && saved.services.length){
+          state.services = saved.services.filter(s => serviceNames[s]);
+          syncServiceButtons();
+          buildQuestions(false);
+          if(Array.isArray(saved.answers)) state.answers = state.questions.map((_,i) => saved.answers[i] || '');
+          state.index = Math.min(Math.max(Number(saved.index) || 0,0), Math.max(state.questions.length - 1,0));
+          if(saved.stage === 'review' && state.questions.length){ showReview(); }
+          else if(saved.stage === 'questions' && state.questions.length){ showQuestion(); }
+          else{ showServices(); }
+        }else{
+          showServices();
+        }
+      }catch(e){
+        clearSaved();
+        showServices();
+      }
+    })();
+  </script>
+</body>
+</html>
