@@ -201,6 +201,9 @@
       .main{min-height:0;overflow:hidden}
       #form{display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden}
       #questionStage{min-height:0;flex:1;overflow:hidden}
+      #reviewStage{min-height:0;flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin}
+      #reviewStage .stage-inner{padding-bottom:28px}
+      #reviewStage .finish{position:sticky;bottom:0;background:linear-gradient(to bottom,rgba(255,255,255,0),#fff 28%);padding:30px 0 14px;z-index:2}
       .chat-shell{height:100%;min-height:0}
       .conversation{min-height:0}
     }
@@ -228,6 +231,8 @@
       .question{font-size:34px;max-width:none}
       textarea{font-size:16px;min-height:145px}
       .review-row{grid-template-columns:1fr;gap:9px}
+      #reviewStage{overflow:visible}
+      #reviewStage .finish{position:static;background:none;padding-top:20px}
     }
     @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.progress-fill,.service{transition:none}}
   </style>
@@ -694,7 +699,9 @@
         state.questions.forEach((item,i) => reviewList.appendChild(makeReviewRow(item.cat, item.q, state.answers[i])));
         updateProgress();
         save();
-        window.scrollTo({top:0,behavior:'smooth'});
+        requestAnimationFrame(() => {
+          reviewStage.scrollTo({top:0,behavior:'smooth'});
+        });
       }
 
       document.querySelectorAll('.service').forEach(btn => {
